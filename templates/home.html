@@ -1,1 +1,64 @@
 {% extends "base.html" %}
+
+{% block content%}
+
+      <section id="benefits-section" class="benefits-section theme-bg-light-gradient py-5">
+	    <div class="container py-5">
+		    <h2 class="section-heading text-center mb-3">Looking for book reviews?</h2>
+		    <div class="section-intro single-col-max mx-auto text-center mb-5">Then you're at the right place.</div>
+		    <div class="flex text-center">
+            <section class="fh5co-books">
+		<div class="site-container flex flex-wrap">
+			<div class="books">
+				{% for book in books %}
+				<div class="single-book">
+					<a href="#" class="single-book__img">
+						<img src="{{ url_for('static', filename='images/books-1.jpg') }}" alt="single book and cd">
+						<div class="single-book_download">
+							<img src="{{ url_for('static', filename='images/download.svg') }}" alt="book image">
+						</div>
+					</a>
+					<h4 class="single-book__title">{{ book.title}}</h4>
+					<h4 class="single-book__detail">{{ book.detail }}</h4>
+					<span class="single-book__price">$15.00</span>
+					<!-- star rating -->
+					<div class="rating">
+						<span>&#9734;</span>
+						<span>&#9734;</span>
+						<span>&#9734;</span>
+						<span>&#9734;</span>
+						<span>&#9734;</span>
+					</div>
+					<!-- star rating end -->
+				</div>
+				{% endfor %}
+			</div>
+			<div class="books-brand-button">
+				<a href="#" class="brand-button">View more</a>
+			</div>
+		</div>
+	</section>
+	
+<br><br><br>
+<h3>Submit Your Review</h3><br>
+<form  method="POST">
+    <div class="form-row align-items-center">
+      <div class="col-auto col-7">
+        <textarea class="md-textarea form-control" rows="3" name="review" placeholder="Comment"></textarea>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary mb-2">Submit</button>
+      </div>
+    </div>
+  </form>
+<br>
+<h3>Reviews</h3><br>
+{% for review in reviews %}
+<h5>User : {{ review.name }}</h5>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ review.comment }}
+{% endfor %}
+		    </div><!--//row-->
+	    </div><!--//container-->
+    </section><!--//benefits-section--> 
+    
+{% endblock content%}
