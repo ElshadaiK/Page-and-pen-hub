@@ -1,7 +1,7 @@
-import os
+import os, requests
 import csv
 from dotenv import load_dotenv
-from flask import Flask, session, render_template, url_for, flash, redirect
+from flask import Flask, session, render_template, url_for, flash, redirect, request
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -22,11 +22,7 @@ Session(app)
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
-
-@app.route("/about")
-def index():
-    return "Project One: TODO"
-
+@app.route("/")
 @app.route("/home")
 def home():
     books = [
@@ -101,3 +97,23 @@ def login():
 
     # User reached route via GET (as by clicking a link or via redirect)
     return render_template('login.html', form=form)
+
+
+@app.route("/search", methods=["GET","POST"])
+def search():
+    if request.method == "GET":
+        return render_template("search.html")
+    else:
+        query = request.form.get("input-search")
+        if query is None:
+            flash(f'Search field can not be empty', 'error')
+        try:
+            result = db.execute("SELECT * FROM books WHERE LOWER(isbn) LIKE :query OR LOWER(title) LIKE :query OR LOWER(author) LIKE :query", {"query": "%" + query.lower() + "%"}).fetchall()
+        except Exception as e:
+            flash(f'{e}', 'error')
+        if not result:
+            flash(f'Your query did not match any documents', 'error')
+            return render_template("search.html")
+
+        return render_template("list.html", result=result)
+
