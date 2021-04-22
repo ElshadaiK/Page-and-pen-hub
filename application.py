@@ -5,6 +5,7 @@ from flask import Flask, session, render_template, url_for, flash, redirect, req
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from functools import wraps
 from forms import RegistrationForm, LoginForm
 from flask_bcrypt import Bcrypt
 
@@ -22,34 +23,27 @@ Session(app)
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
+## Helper
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session["logged_in"] == False:
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def logout_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session["logged_in"] == True:
+            return redirect(url_for("home"))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route("/", methods=["GET","POST"])
 @app.route("/home", methods=["GET","POST"])
 def home():
-    books = db.execute("SELECT * from books")   
-    # books = [
-    #     {
-    #         "title": "heyy",
-    #         "detail": "Detail case",
-    #         "reviews": "Reveiws"
-    #     },
-    #     {
-    #         "title": "heyy",
-    #         "detail": "Detail case",
-    #         "reviews": "Reveiws"
-    #     },
-    #     {
-    #         "title": "heyy",
-    #         "detail": "Detail case",
-    #         "reviews": "Reveiws"
-    #     },
-    #     {
-    #         "title": "heyy",
-    #         "detail": "Detail case",
-    #         "reviews": "Reveiws"
-    #     },
-    # ]
-    print(books)
+    books = db.execute("SELECT * from books ORDER BY random() LIMIT 50")   
     if request.method == "GET":
         return render_template("home.html", books=books)
     else:
@@ -70,9 +64,8 @@ def home():
         return render_template("list.html", result=result)
 
 @app.route('/register', methods=['GET', 'POST'])
+@logout_required
 def register():
-    if session["logged_in"] == True:
-        return redirect(url_for('home'))
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
@@ -89,9 +82,8 @@ def register():
     return render_template('register.html', form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
+@logout_required
 def login():
-    if session["logged_in"] == True:
-        return redirect(url_for('home'))
     form = LoginForm()
     if form.validate_on_submit():
         try: 
@@ -121,6 +113,7 @@ def login():
     return render_template('login.html', form=form)
 
 @app.route("/logout")
+@login_required
 def logout():
     # Forget any user_id
     session.clear()
@@ -131,9 +124,8 @@ def logout():
 
 
 @app.route("/details/<int:bookid>", methods=["GET","POST"])
+@login_required
 def details(bookid):
-    if session["logged_in"] == False:
-        return redirect(url_for('login'))
     if request.method == "GET":
         #Get book details
         result = db.execute("SELECT * from books WHERE id = :id", {"id": bookid}).fetchone()

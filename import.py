@@ -41,7 +41,7 @@ def create_book_table():
     create_book_table = """
     CREATE TABLE books (
           id SERIAL PRIMARY KEY,
-          isbn VARCHAR NOT NULL,
+          isbn VARCHAR NOT NULL UNIQUE,
           title VARCHAR NOT NULL,
           author VARCHAR NOT NULL,
           year VARCHAR NOT NULL
@@ -66,7 +66,7 @@ def create_review_table():
 
 
 if __name__ == '__main__':
-    # main()
     create_user_table()
     create_book_table()
     create_review_table()
+    main()

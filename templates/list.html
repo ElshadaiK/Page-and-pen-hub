@@ -2,32 +2,31 @@
 
 {% block content %}
 <div class="container mt-5">
-  <div class="row">
-    <div class="col-md-6 col-sm-12">
-      <table class="table .list">
-      <thead>
-        <tr>
-          <th scope="col">ISBN</th>
-          <th scope="col">Title</th>
-          <th scope="col">Author</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in result %}
-        <tr>
-          <td>{{item.isbn}}</td>
-          <td>{{item.title}}</td>
-          <td>{{item.author}}</td>
-          <td><a href= "details/{{item.id}}">Details</a></td>
-        </tr>
-        {% endfor %}
-      </tbody>
-      </table>
+  <div class="row mt-6">
+      <div class="col-md-9 col-sm-12">
+        <table class="table .list">
+          <thead>
+            <tr>
+              <th scope="col">ISBN</th>
+              <th scope="col">Title</th>
+              <th scope="col">Author</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in result %}
+            <tr>
+              <td>{{item.isbn}}</td>
+              <td>{{item.title}}</td>
+              <td>{{item.author}}</td>
+              <td><a href= "details/{{item.id}}">Details</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
-    {% endblock %}
-
-    </div>
-    <div class="col-md-6 col-sm-0">
+    <div class="col-md-3 col-sm-0">
 
     </div>
   </div>
+{% endblock %}
