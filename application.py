@@ -1,7 +1,7 @@
 import os, requests
 import csv
 from dotenv import load_dotenv
-from flask import Flask, session, render_template, url_for, flash, redirect, request
+from flask import Flask, session, render_template, url_for, flash, redirect, request, jsonify
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -23,7 +23,44 @@ Session(app)
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
-## Helper
+## Helpers
+def getData(bookid):
+    data = {}
+    #Get book details
+    result = db.execute("SELECT * from books WHERE id = :id", {"id": bookid}).fetchone()
+    if(result):
+        data['title'] = result.title
+        data['isbn'] = result.isbn
+        data['author'] = result.author
+        data['year'] = result.year
+
+        #Get API data from Google API
+        try:
+            google = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=isbn:{result.isbn}").json()
+            comment_list = db.execute("SELECT u.username, u.email, r.review_score, r.review_msg from reviews r JOIN users u ON u.id=r.users_id WHERE books_id = :id", {"id": bookid}).fetchall()
+            if comment_list is None:
+                comment_list = []
+            if(google['totalItems'] > 0):
+                data['review count'] = google["items"][0]["volumeInfo"]["ratingsCount"] + len(comment_list)
+                data['average score'] = google["items"][0]["volumeInfo"]["averageRating"]
+                data['thumbnail'] = google["items"][0]["volumeInfo"]["imageLinks"]["thumbnail"]
+            else:
+                data['review count'] = len(comment_list)
+                average = 0
+
+                for comment in comment_list:
+                    average += comment.review_score
+
+                if(len(comment_list) > 0):
+                    average /= len(comment_list)
+                data['average score'] = average
+            data['comments'] = comment_list
+        except Exception as e:
+            flash(f'Error {e}!', 'danger')
+    else:
+        flash(f'Invalid book id', 'danger')
+    return data
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -39,6 +76,7 @@ def logout_required(f):
             return redirect(url_for("home"))
         return f(*args, **kwargs)
     return decorated_function
+
 
 @app.route("/", methods=["GET","POST"])
 @app.route("/home", methods=["GET","POST"])
@@ -63,6 +101,7 @@ def home():
 
         return render_template("list.html", result=result)
 
+
 @app.route('/register', methods=['GET', 'POST'])
 @logout_required
 def register():
@@ -80,6 +119,7 @@ def register():
 
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 @logout_required
@@ -112,6 +152,7 @@ def login():
     # User reached route via GET (as by clicking a link or via redirect)
     return render_template('login.html', form=form)
 
+
 @app.route("/logout")
 @login_required
 def logout():
@@ -127,21 +168,8 @@ def logout():
 @login_required
 def details(bookid):
     if request.method == "GET":
-        #Get book details
-        result = db.execute("SELECT * from books WHERE id = :id", {"id": bookid}).fetchone()
-
-        #Get API data from Google API
-        try:
-            google = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=isbn:{result.isbn}")
-        except Exception as e:
-            flash(f'API Error {e}!', 'danger')
-
-        # Get comments particular to one book
-        comment_list = db.execute("SELECT u.username, u.email, r.review_score, r.review_msg from reviews r JOIN users u ON u.id=r.users_id WHERE books_id = :id", {"id": bookid}).fetchall()
-        if not result:
-            flash(f'Invalid book id', 'danger')
-    
-        return render_template("details.html", result=result, comment_list=comment_list , bookid=bookid, google=google.json())
+        data = getData(bookid)
+        return render_template("details.html", result=data, comment_list=data['comments'] , bookid=bookid)
     else:
         ######## Check if the user commented on this particular book before ###########
         user_reviewed_before = db.execute("SELECT * from reviews WHERE users_id = :users_id AND books_id = :book_id",  {"users_id": session["users_id"], "book_id": bookid}).fetchone()
@@ -168,6 +196,12 @@ def details(bookid):
         return redirect(url_for("details", bookid=bookid))
 
 
+@app.route("/api/<int:bookid>")
+@login_required
+def api(bookid):
+    data = getData(bookid)
+    return jsonify(data)
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
