@@ -64,12 +64,12 @@
 				{% for item in comment_list %}
           
 					<div class="item col-12 col-lg-4 p-3 mb-4">
-						{% if item.u_id == session['users_id']%}
-							<a href="{{url_for('del_review', bookid=bookid, review_id=item.r_id)}}">
-								<i class='fa fa-times-circle'></i>
-							</a>
-						{% endif %}
 						<div class="item-inner theme-bg-light rounded p-4">
+							{% if item.u_id == session['users_id']%}
+								<a class='text-danger del-rev' href="{{url_for('del_review', bookid=bookid, review_id=item.r_id)}}">
+									<i class='fa fa-times-circle'></i>
+								</a>
+							{% endif %}
 							{% if item.review_score == 5 %}
 								<span class="badge badge-success float-right">rated {{item.review_score}}</span>
 							{% elif item.review_score == 4 or item.review_score == 3 %}

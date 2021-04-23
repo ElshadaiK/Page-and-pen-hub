@@ -10451,6 +10451,16 @@ a.theme-link:hover {
     border-radius: 50%;
 }
 
+.del-rev {
+    position: absolute;
+    left: 0;
+    top: 1%;
+    display: inline-block;
+    color: #fff;
+    text-align: center;
+    border-radius: 5%;
+}
+
 .add-icon {
     position: absolute;
     left: 1%;
