@@ -35,7 +35,7 @@
 					    {% if result["thumbnail"] %}
 							<img class="img-fluid book-cover float-right" src="{{ result["thumbnail"] }}" alt="book cover" >
 						{% else %}
-							<img class="img-fluid book-cover float-right" src="{{ url_for('static', filename='images/devbook-cover.png') }}" alt="book cover" >
+							<img class="img-fluid book-cover float-right" src="{{ url_for('static', filename='images/devbook-cover.jpeg') }}" alt="book cover" >
 						
 						{% endif %}
 						<!--//<div class="book-badge d-inline-block shadow">New<br>Release</div>-->
@@ -58,6 +58,9 @@
 		  <section id="reviews-section" class="reviews-section py-5">
 			<div class="container">
 				<div class="row justify-content-center">
+				{% if not(comment_list)%}
+					<h4>Be the first one to comment below</h4>
+				{% endif %}
 				{% for item in comment_list %}
           
 					<div class="item col-12 col-lg-4 p-3 mb-4">

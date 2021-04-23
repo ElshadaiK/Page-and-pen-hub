@@ -1,7 +1,7 @@
 import os, requests
 import csv
 from dotenv import load_dotenv
-from flask import Flask, session, render_template, url_for, flash, redirect, request, jsonify
+from flask import Flask, session, render_template, url_for, flash, redirect, request, jsonify, abort
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -24,6 +24,16 @@ engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
 ## Helpers
+def getAverage(comment_list):
+    average = 0
+
+    for comment in comment_list:
+        average += comment.review_score
+
+    if(len(comment_list) > 0):
+        average /= len(comment_list)
+    return average
+
 def getData(bookid):
     data = {}
     #Get book details
@@ -42,18 +52,23 @@ def getData(bookid):
                 comment_list = []
             if(google['totalItems'] > 0):
                 data['review count'] = google["items"][0]["volumeInfo"]["ratingsCount"] + len(comment_list)
-                data['average score'] = google["items"][0]["volumeInfo"]["averageRating"]
-                data['thumbnail'] = google["items"][0]["volumeInfo"]["imageLinks"]["thumbnail"]
+                av1 = getAverage(comment_list)
+                av2 = (google["items"][0]["volumeInfo"]["averageRating"])
+                av3 = av2
+                if av1 > 0:
+                    av3 = (av1 + av2)/2
+                data['average score'] = av3
+                if('imageLinks' in google["items"][0]["volumeInfo"]):
+                    if('thumbnail' in google["items"][0]["volumeInfo"]["imageLinks"]):
+                        data['thumbnail'] = google["items"][0]["volumeInfo"]["imageLinks"]["thumbnail"]
+                
             else:
                 data['review count'] = len(comment_list)
-                average = 0
-
-                for comment in comment_list:
-                    average += comment.review_score
-
-                if(len(comment_list) > 0):
-                    average /= len(comment_list)
-                data['average score'] = average
+                av1 = getAverage(comment_list)
+                if(av1 > 0):
+                    data['average score'] = av1
+                else:
+                    data['average score'] = "Data not available"
             data['comments'] = comment_list
         except Exception as e:
             flash(f'Error {e}!', 'danger')
@@ -81,7 +96,7 @@ def logout_required(f):
 @app.route("/", methods=["GET","POST"])
 @app.route("/home", methods=["GET","POST"])
 def home():
-    books = db.execute("SELECT * from books ORDER BY random() LIMIT 50")   
+    books = db.execute("SELECT * from books ORDER BY random() LIMIT 10")
     if request.method == "GET":
         return render_template("home.html", books=books)
     else:
@@ -169,6 +184,8 @@ def logout():
 def details(bookid):
     if request.method == "GET":
         data = getData(bookid)
+        if(not('comments' in data)):
+            data['comments'] = []
         return render_template("details.html", result=data, comment_list=data['comments'] , bookid=bookid)
     else:
         ######## Check if the user commented on this particular book before ###########
@@ -200,6 +217,8 @@ def details(bookid):
 @login_required
 def api(bookid):
     data = getData(bookid)
+    if(data == {}):
+        abort(404)
     return jsonify(data)
     
 
