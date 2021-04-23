@@ -231,7 +231,3 @@ def del_review(bookid, review_id):
     db.commit()
     return redirect(url_for("details", bookid=bookid))
 
-    
-
-if __name__ == '__main__':
-    app.run(debug=True)
