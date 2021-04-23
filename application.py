@@ -34,10 +34,13 @@ def getAverage(comment_list):
         average /= len(comment_list)
     return average
 
-def getData(bookid):
+def getData(bookid=0,isbn=0):
     data = {}
     #Get book details
-    result = db.execute("SELECT * from books WHERE id = :id", {"id": bookid}).fetchone()
+    if(bookid == 0):
+        result = db.execute("SELECT * from books WHERE isbn = :isbn", {"isbn": isbn}).fetchone()
+    else:
+        result = db.execute("SELECT * from books WHERE id = :id", {"id": bookid}).fetchone()
     if(result):
         data['title'] = result.title
         data['isbn'] = result.isbn
@@ -47,7 +50,7 @@ def getData(bookid):
         #Get API data from Google API
         try:
             google = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=isbn:{result.isbn}").json()
-            comment_list = db.execute("SELECT u.username, u.email, r.review_score, r.review_msg from reviews r JOIN users u ON u.id=r.users_id WHERE books_id = :id", {"id": bookid}).fetchall()
+            comment_list = db.execute("SELECT u.username, u.email, u.id AS u_id, r.id as r_id, r.review_score, r.review_msg from reviews r JOIN users u ON u.id=r.users_id WHERE books_id = :id", {"id": bookid}).fetchall()
             if comment_list is None:
                 comment_list = []
             if(google['totalItems'] > 0):
@@ -213,13 +216,21 @@ def details(bookid):
         return redirect(url_for("details", bookid=bookid))
 
 
-@app.route("/api/<int:bookid>")
+@app.route("/api/<isbn>")
 @login_required
-def api(bookid):
-    data = getData(bookid)
+def api(isbn):
+    data = getData(0,isbn)
     if(data == {}):
         abort(404)
     return jsonify(data)
+    
+@app.route("/del_review/<int:bookid>/<int:review_id>")
+@login_required
+def del_review(bookid, review_id):
+    db.execute("DELETE from reviews WHERE id = :id", {"id": review_id})
+    db.commit()
+    return redirect(url_for("details", bookid=bookid))
+
     
 
 if __name__ == '__main__':
