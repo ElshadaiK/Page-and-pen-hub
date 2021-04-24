@@ -106,7 +106,7 @@ def home():
     if request.method == "GET":
         return render_template("home.html", books=books)
     else:
-        if ("logged_in" not in session) and (session["logged_in"] == False):
+        if ("logged_in" not in session) or (session["logged_in"] == False):
             return redirect(url_for('login'))
         query = request.form.get("input-search")
         if query is None:
