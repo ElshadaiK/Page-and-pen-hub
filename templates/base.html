@@ -32,28 +32,31 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse ml-1" id="navbarSupportedContent">
-        
+        <div class="collapse navbar-collapse ml-4 flex-row-reverse" id="navbarSupportedContent">
+
+            {% if session['logged_in'] == True%}
+            <div class="nav-item dropdown mr-4 ml-5">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <div class="book-badge d-inline-block shadow">{{ session['username'][0]}}</div>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="nav-link" href="{{url_for("logout")}}">Logout</a>
+                </div>
+            </div>
+            {% else %}
+            <h4 class="nav-item ml-4">
+                    <a class="nav-link" href="{{url_for("login")}}">Login</a>
+                </h4>
+            {% endif %}
+
             <form class="form-inline my-2 my-lg-0" action="{{url_for("home")}}" method="POST">
             <input class="form-control mr-sm-2" type="search" placeholder="Enter ISBN, Author, or Title" aria-label="Search" name="input-search">
             <button class="btn btn-primary my-2 my-sm-0 btn-sm" type="submit">Search</button>
             </form>
-        </div>
         
-        {% if session['logged_in'] == True%}
-        <div class="nav-item dropdown mr-4">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <div class="book-badge d-inline-block shadow">{{ session['username'][0]}}</div>
-            </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="nav-link" href="{{url_for("logout")}}">Logout</a>
-            </div>
+            
+        
         </div>
-        {% else %}
-        <h4 class="nav-item ml-4">
-                <a class="nav-link" href="{{url_for("login")}}">Login</a>
-            </h4>
-        {% endif %}
         </nav>
     </header><!--//header-->
     
