@@ -14,3 +14,5 @@ In Procfile is the Heroku code to be run when Heroku builds the app
 In links.md is the link of the hosted Heroku app.
 In wsgi.py is the command to be executed when the app runs
 In requirements.txt, there are lists of packages and dependencies required for the application.
+
+This webapp redirects to 404 page not found page when requested to get unknown url

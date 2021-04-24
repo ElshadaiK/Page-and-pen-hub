@@ -11,7 +11,7 @@
 								<i class='fa fa-plus'></i>
 							</a>
 						 </div>
-					    <h1 class="headline mb-3">
+						 <h1 class="headline mb-3">
 						    {{result['title']}}   
 					    </h1><!--//headline-->
 					    <div class="subheadline mb-4">
@@ -24,8 +24,9 @@
 								Average Rating: {{ result['average score'] }}
 						</div>
 						<div class="subheadline mb-4">
-							# of Ratings: {{ result['review count']}}
+							Number of Ratings: {{ result['review count']}}
 						</div>
+						<a class="btn btn-secondary" href="{{url_for('api', isbn=result['isbn'])}}">JSON File</a>
 						
 
 				    </div><!--//promo-->
@@ -52,14 +53,15 @@
     <div class="row pt-4 rounded-pill" id="details">
         <div class="col-md-8">
           
-
-          <h3>Comments</h3>
+		  <h3>Comments</h3>
+					    
           
 		  <section id="reviews-section" class="reviews-section py-5">
 			<div class="container">
 				<div class="row justify-content-center">
 				{% if not(comment_list)%}
-					<h4>Be the first one to comment below</h4>
+					<h4 class="item-heading">Be the first one to comment below</h4>
+		  
 				{% endif %}
 				{% for item in comment_list %}
           

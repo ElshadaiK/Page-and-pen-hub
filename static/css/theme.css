@@ -10359,7 +10359,7 @@ a.theme-link:hover {
     color: #ed6524
 }
 
-.benefits-section .item-heading {
+.item-heading {
     font-size: 1.125rem
 }
 
@@ -10393,11 +10393,11 @@ a.theme-link:hover {
     box-shadow: 10px 10px 5px grey;
 }
 
-.audience-section .item-title {
+.item-title {
     font-size: 1.125rem
 }
 
-.audience-section .item-icon {
+.item-icon {
     font-size: 1.25rem;
     color: #7FCDB8
 }

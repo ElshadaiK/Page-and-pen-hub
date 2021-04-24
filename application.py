@@ -77,7 +77,7 @@ def getData(bookid=0,isbn=0):
                     data['average score'] = "Data not available"
             data['comments'] = comment_list
         except Exception as e:
-            flash(f'Error {e}!', 'danger')
+            flash(f'Connection Error', 'danger')
     else:
         flash(f'Invalid book id', 'danger')
     return data
@@ -114,7 +114,7 @@ def home():
         try:
             result = db.execute("SELECT * FROM books WHERE LOWER(isbn) LIKE :query OR LOWER(title) LIKE :query OR LOWER(author) LIKE :query", {"query": "%" + query.lower() + "%"}).fetchall()
         except Exception as e:
-            flash(f'{e}', 'warning')
+            flash(f'Conection Error', 'warning')
             return render_template("home.html", books=books)
         if not result:
             flash(f'Your query did not match any documents', 'danger')
@@ -136,7 +136,7 @@ def register():
                 db.commit()
         
         except Exception as e:
-            flash(f'Account not created for {e}!', 'danger')
+            flash(f'Account not created!', 'danger')
 
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
@@ -161,7 +161,7 @@ def login():
                 
 
         except Exception as e:
-            flash(f'{e}', 'warning')
+            flash(f'Connection Error', 'warning')
 
         session["users_id"] = Q.id
         session["email"] = Q.email
@@ -212,7 +212,7 @@ def details(bookid):
             db.execute("INSERT INTO reviews (users_id, books_id, review_score, review_msg) VALUES (:users_id, :books_id, :review_score, :review_msg)",
                            {"users_id": session["users_id"], "books_id": bookid, "review_score":user_rating, "review_msg": user_comment})
         except Exception as e:
-            flash(f'Error occured {e}', 'warning')
+            flash(f'Error occured', 'warning')
 
         #success - redirect to details page
         db.commit()
@@ -224,7 +224,10 @@ def details(bookid):
 def api(isbn):
     data = getData(0,isbn)
     if(data == {}):
-        abort(404)
+        data = {
+            "error": "True",
+            "message": "ISBN not found"
+        }
     return jsonify(data)
     
 @app.route("/del_review/<int:bookid>/<int:review_id>")
@@ -234,3 +237,6 @@ def del_review(bookid, review_id):
     db.commit()
     return redirect(url_for("details", bookid=bookid))
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
