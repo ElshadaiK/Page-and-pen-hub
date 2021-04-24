@@ -112,7 +112,7 @@ def home():
         if query is None:
             flash(f'Search field can not be empty', 'danger')
         try:
-            result = db.execute("SELECT * FROM books WHERE LOWER(isbn) LIKE :query OR LOWER(title) LIKE :query OR LOWER(author) LIKE :query", {"query": "%" + query.lower() + "%"}).fetchall()
+            result = db.execute("SELECT * FROM books WHERE LOWER(isbn) LIKE :query OR LOWER(title) LIKE :query OR LOWER(author) LIKE :query ", {"query": "%" + query.lower() + "%"}).fetchall()
         except Exception as e:
             flash(f'Conection Error', 'warning')
             return render_template("home.html", books=books)
@@ -120,7 +120,7 @@ def home():
             flash(f'Your query did not match any documents', 'danger')
             return render_template("home.html", books=books)
 
-        return render_template("list.html", result=result)
+        return render_template("list.html", result=result, key=query)
 
 
 @app.route('/register', methods=['GET', 'POST'])
