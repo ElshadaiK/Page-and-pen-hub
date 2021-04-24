@@ -22,7 +22,7 @@ Session(app)
 # Set up database
 dbUrl = os.getenv("DATABASE_URL")
 if(dbUrl[8] == ":"):
-    dbUrl = dbUrl[0:8] + "ql" + dbUrl[8:-1]
+    dbUrl = dbUrl[0:8] + "ql" + dbUrl[8:len(dbUrl)]
 engine = create_engine(dbUrl)
 db = scoped_session(sessionmaker(bind=engine))
 
