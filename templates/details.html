@@ -21,7 +21,7 @@
 						    {{result['year']}}
 					    </div>
 						<div class="subheadline mb-4">
-								Average Rating: {{ result['average score'] }}
+								Average Rating: {{'%0.2f'|format(result['average score']|float)  }}
 						</div>
 						<div class="subheadline mb-4">
 							Number of Ratings: {{ result['review count']}}
