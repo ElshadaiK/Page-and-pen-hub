@@ -82,7 +82,7 @@ def getData(bookid=0,isbn=0):
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if ("logged_in" in session) and (session["logged_in"] == False):
+        if ("logged_in" not in session) or (session["logged_in"] == False):
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorated_function
@@ -103,7 +103,7 @@ def home():
     if request.method == "GET":
         return render_template("home.html", books=books)
     else:
-        if ("logged_in" in session) and (session["logged_in"] == False):
+        if ("logged_in" not in session) and (session["logged_in"] == False):
             return redirect(url_for('login'))
         query = request.form.get("input-search")
         if query is None:
