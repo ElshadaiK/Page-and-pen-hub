@@ -2,9 +2,13 @@
 
 {% block content %}
 <div class="container mt-5">
-  <div class="row mt-6">
-  <h4 class="item-heading">Search results for "{{key}}"</h4>
+<h4 class="item-heading pt-5 mt-6">Search results for "{{key}}"</h4>
+  
+  <div class="row mt-5">
       <div class="col-md-9 col-sm-12">
+        {% if book_not_found %}
+          <div class="section-intro text-center single-col-max mx-auto mb-5">The book you're looking for <span class='text-danger'>doesn't</span> exist.</div>
+        {% else %}
         <table class="table .list">
           <thead>
             <tr>
@@ -24,6 +28,7 @@
             {% endfor %}
           </tbody>
         </table>
+        {% endif %}
       </div>
     </div>
     <div class="col-md-3 col-sm-0">

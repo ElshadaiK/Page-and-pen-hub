@@ -22,7 +22,12 @@
                         <div class="form-group">
                             {{ form.submit(class='btn btn-primary btn-block') }}
                         </div> <!-- form-group// -->
-                        <p class="text-center"><a href="{{url_for("register")}}" class="">Don't have an account?</a></p>
+                        <input
+                            type="hidden"
+                            name="next"
+                            value="{{ request.args.get('next', '') }}"
+                        />
+                        <p class="text-center"><a href="{{url_for("register", next=request.args.get('next', ''))}}" class="">Don't have an account?</a></p>
                     </form>
                 </div>
             </div>

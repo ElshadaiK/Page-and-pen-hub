@@ -86,7 +86,8 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if ("logged_in" not in session) or (session["logged_in"] == False):
-            return redirect(url_for("login"))
+            next = request.url
+            return redirect(url_for("login", next=next))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -117,8 +118,7 @@ def home():
             flash(f'Conection Error', 'warning')
             return render_template("home.html", books=books)
         if not result:
-            flash(f'Your query did not match any documents', 'danger')
-            return render_template("home.html", books=books)
+            return render_template("list.html", result=result, book_not_found=True, key=query)
 
         return render_template("list.html", result=result, key=query)
 
@@ -129,6 +129,7 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        next_url = form.next.data
         try:
                 db.execute("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)",
                                {"username": form.username.data, "email":form.email.data, "password": hashed_password})
@@ -138,7 +139,7 @@ def register():
         except Exception as e:
             flash(f'Account not created!', 'danger')
 
-        return redirect(url_for('login'))
+        return redirect(url_for("login", next=next_url))
     return render_template('register.html', form=form)
 
 
@@ -148,6 +149,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         try: 
+            next_url = form.next.data
             Q = db.execute("SELECT * FROM users WHERE email LIKE :email", {"email": form.email.data}).fetchone()
 
             # User exists ?
@@ -158,16 +160,20 @@ def login():
                 flash(f'Invalid Login', 'danger')
             else:
                 flash(f'Logged in successfully', 'success')
+                session["users_id"] = Q.id
+                session["email"] = Q.email
+                session["username"] = Q.username
+                session["password"] = Q.password
+                session["logged_in"] = True
+
+                if next_url:
+                    return redirect(next_url)
                 
 
         except Exception as e:
-            flash(f'Connection Error', 'warning')
+            flash(f'Connection Error {e}', 'warning')
 
-        session["users_id"] = Q.id
-        session["email"] = Q.email
-        session["username"] = Q.username
-        session["password"] = Q.password
-        session["logged_in"] = True
+        
         return redirect(url_for("home"))
 
     # User reached route via GET (as by clicking a link or via redirect)
