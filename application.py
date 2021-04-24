@@ -181,7 +181,6 @@ def login():
 
 
 @app.route("/logout")
-@login_required
 def logout():
     # Forget any user_id
     session.clear()
